@@ -1,0 +1,91 @@
+package com.hrms.department.service;
+
+import com.hrms.common.exception.DuplicateResourceException;
+import com.hrms.common.exception.ResourceNotFoundException;
+import com.hrms.department.dto.DepartmentRequestDTO;
+import com.hrms.department.dto.DepartmentResponseDTO;
+import com.hrms.department.entity.DepartmentEntity;
+import com.hrms.department.mapper.DepartmentMapper;
+import com.hrms.department.repository.DepartmentRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class DepartmentServiceImpl implements DepartmentService {
+
+    private final DepartmentRepository departmentRepository;
+    private final DepartmentMapper departmentMapper;
+
+    @Override
+    public DepartmentResponseDTO createDepartment(DepartmentRequestDTO requestDTO) {
+
+        // Check Duplicate Department Code
+        if (departmentRepository.findByDepartmentCode(requestDTO.getDepartmentCode()).isPresent()) {
+            throw new DuplicateResourceException("Department Code already exists");
+        }
+
+        // Check Duplicate Department Name
+        if (departmentRepository.findByDepartmentName(requestDTO.getDepartmentName()).isPresent()) {
+            throw new DuplicateResourceException("Department Name already exists");
+        }
+
+        DepartmentEntity entity = departmentMapper.toEntity(requestDTO);
+
+        entity.setCreatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        DepartmentEntity savedDepartment = departmentRepository.save(entity);
+
+        return departmentMapper.toResponseDTO(savedDepartment);
+    }
+
+    @Override
+    public Page<DepartmentResponseDTO> getAllDepartments(Pageable pageable) {
+
+        return departmentRepository.findAll(pageable)
+                .map(departmentMapper::toResponseDTO);
+    }
+    @Override
+    public DepartmentResponseDTO getDepartmentById(Long id) {
+
+        DepartmentEntity entity = departmentRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Department not found with id : " + id));
+
+        return departmentMapper.toResponseDTO(entity);
+    }
+
+    @Override
+    public DepartmentResponseDTO updateDepartment(Long id, DepartmentRequestDTO requestDTO) {
+
+        DepartmentEntity entity = departmentRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Department not found with id : " + id));
+
+        entity.setDepartmentCode(requestDTO.getDepartmentCode());
+        entity.setDepartmentName(requestDTO.getDepartmentName());
+        entity.setDescription(requestDTO.getDescription());
+        entity.setStatus(requestDTO.getStatus());
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        DepartmentEntity updatedDepartment = departmentRepository.save(entity);
+
+        return departmentMapper.toResponseDTO(updatedDepartment);
+    }
+
+    @Override
+    public void deleteDepartment(Long id) {
+
+        DepartmentEntity entity = departmentRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Department not found with id : " + id));
+
+        departmentRepository.delete(entity);
+    }
+}

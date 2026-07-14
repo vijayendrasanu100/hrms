@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: hrms
+
+  datasource:
+    url: jdbc:postgresql://ep-flat-pine-aopmio6b-pooler.c-2.ap-southeast-1.aws.neon.tech/hrms_db?sslmode=require&channel_binding=require
+    username: neondb_owner
+    password: npg_zWkRp7eT8iHx
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+    show-sql: true
+
+    open-in-view: false
+
+    properties:
+      hibernate:
+        format_sql: true
+
