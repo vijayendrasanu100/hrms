@@ -15,7 +15,7 @@ import java.util.UUID;
 @MappedSuperclass
 public abstract class BaseEntity {
 
-    @Column(name = "company_id", nullable = false)
+    @Column(name = "company_id")
     private UUID companyId;
 
     @CreationTimestamp
