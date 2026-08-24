@@ -13,13 +13,6 @@ import lombok.*;
 public class DepartmentRequestDTO {
 
     @Schema(
-            description = "Unique department code",
-            example = "FIN"
-    )
-    @NotBlank(message = "Department code is required")
-    private String departmentCode;
-
-    @Schema(
             description = "Department name",
             example = "Finance"
     )
