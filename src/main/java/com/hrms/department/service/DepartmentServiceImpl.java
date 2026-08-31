@@ -44,8 +44,6 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         if (codeExists) {
             throw new DuplicateResourceException("Department Code already exists");
-        } else {
-            // Code is available — continue with creation
         }
 
         DepartmentEntity entity = departmentMapper.toEntity(requestDTO);
@@ -53,7 +51,8 @@ public class DepartmentServiceImpl implements DepartmentService {
         // Code is generated automatically
         entity.setDepartmentCode(departmentCode);
 
-        DepartmentEntity savedDepartment = departmentRepository.save(entity);
+        DepartmentEntity savedDepartment =
+                departmentRepository.save(entity);
 
         return departmentMapper.toResponseDTO(savedDepartment);
     }
@@ -61,18 +60,20 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public Page<DepartmentResponseDTO> getAllDepartments(Pageable pageable) {
 
-        return departmentRepository.findAll(pageable)
+        return departmentRepository
+                .findAllByIsDeletedFalse(pageable)
                 .map(departmentMapper::toResponseDTO);
     }
 
     @Override
     public DepartmentResponseDTO getDepartmentById(Long id) {
 
-        DepartmentEntity entity = departmentRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Department not found with id : " + id
-                        ));
+        DepartmentEntity entity =
+                departmentRepository.findByIdAndIsDeletedFalse(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Department not found with id : " + id
+                                ));
 
         return departmentMapper.toResponseDTO(entity);
     }
@@ -82,11 +83,12 @@ public class DepartmentServiceImpl implements DepartmentService {
             Long id,
             DepartmentRequestDTO requestDTO) {
 
-        DepartmentEntity entity = departmentRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Department not found with id : " + id
-                        ));
+        DepartmentEntity entity =
+                departmentRepository.findByIdAndIsDeletedFalse(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Department not found with id : " + id
+                                ));
 
         entity.setDepartmentName(requestDTO.getDepartmentName());
         entity.setDescription(requestDTO.getDescription());
@@ -101,12 +103,16 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public void deleteDepartment(Long id) {
 
-        DepartmentEntity entity = departmentRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Department not found with id : " + id
-                        ));
+        DepartmentEntity entity =
+                departmentRepository.findByIdAndIsDeletedFalse(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Department not found with id : " + id
+                                ));
 
-        departmentRepository.delete(entity);
+        // Soft Delete
+        entity.setIsDeleted(true);
+
+        departmentRepository.save(entity);
     }
 }

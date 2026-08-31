@@ -1,6 +1,8 @@
 package com.hrms.department.repository;
 
 import com.hrms.department.entity.DepartmentEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -15,6 +17,10 @@ public interface DepartmentRepository extends JpaRepository<DepartmentEntity, Lo
     Optional<DepartmentEntity> findByDepartmentName(String departmentName);
 
     boolean existsByDepartmentCode(String departmentCode);
+
+    Optional<DepartmentEntity> findByIdAndIsDeletedFalse(Long id);
+
+    Page<DepartmentEntity> findAllByIsDeletedFalse(Pageable pageable);
 
     @Query("""
            SELECT COALESCE(MAX(
